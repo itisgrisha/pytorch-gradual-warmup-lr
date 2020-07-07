@@ -13,8 +13,9 @@ class GradualWarmupScheduler(_LRScheduler):
         after_scheduler: after target_epoch, use this scheduler(eg. ReduceLROnPlateau)
     """
 
-    def __init__(self, optimizer, multiplier, total_epoch, after_scheduler=None, ignore_first_iters=0):
+    def __init__(self, optimizer, multiplier, total_epoch, after_scheduler=None, ignore_first_iters=0, ignore_first_iters_lr=0.001):
         self.ignore_first_iters = ignore_first_iters
+        self.ignore_first_iters_lr = ignore_first_iters_lr
         self.multiplier = multiplier
         if self.multiplier < 1.:
             raise ValueError('multiplier should be greater thant or equal to 1.')
@@ -33,7 +34,7 @@ class GradualWarmupScheduler(_LRScheduler):
             return [base_lr * self.multiplier for base_lr in self.base_lrs]
 
         if self.last_epoch < self.ignore_first_iters:
-            return [base_lr * self.multiplier for base_lr in self.base_lrs]
+            return [self.ignore_first_iters_lr for base_lr in self.base_lrs]
 
         if self.multiplier == 1.0:
             return [base_lr * (float(self.last_epoch-self.ignore_first_iters) / self.total_epoch) for base_lr in self.base_lrs]
